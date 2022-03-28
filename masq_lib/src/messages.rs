@@ -638,6 +638,20 @@ pub struct UiGenerateWalletsResponse {
 conversation_message!(UiGenerateWalletsResponse, "generateWallets");
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum SerializableLogLevel {
+    Error,
+    Warn,
+    Info,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct UiLogBroadcast {
+    pub msg: String,
+    pub log_level: SerializableLogLevel,
+}
+fire_and_forget_message!(UiLogBroadcast, "logBroadcast");
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct UiNewPasswordBroadcast {}
 fire_and_forget_message!(UiNewPasswordBroadcast, "newPassword");
 
