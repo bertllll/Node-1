@@ -39,6 +39,9 @@ use automap_lib::control_layer::automap_control::{
 };
 use masq_lib::blockchains::chains::Chain;
 use masq_lib::crash_point::CrashPoint;
+#[cfg(feature = "log_recipient_test")]
+use masq_lib::logger::log_broadcast_substitution_in_tests::prepare_log_recipient;
+#[cfg(not(feature = "log_recipient_test"))]
 use masq_lib::logger::prepare_log_recipient;
 use masq_lib::ui_gateway::{NodeFromUiMessage, NodeToUiMessage};
 use masq_lib::utils::{exit_process, AutomapProtocol};
@@ -1026,8 +1029,7 @@ mod tests {
             &Some(main_cryptde()),
             &Some(alias_cryptde()),
         );
-        let mut tools = ActorSystemFactoryToolsReal::new();
-        tools.log_recipient_setter = Box::new(LogRecipientSetterNull::new());
+        let mut tools = make_subject_with_null_setter();
         tools.automap_control_factory = Box::new(
             AutomapControlFactoryMock::new().make_result(
                 AutomapControlMock::new()
@@ -1093,8 +1095,7 @@ mod tests {
             },
         };
         let add_mapping_params_arc = Arc::new(Mutex::new(vec![]));
-        let mut subject = ActorSystemFactoryToolsReal::new();
-        subject.log_recipient_setter = Box::new(LogRecipientSetterNull::new());
+        let mut subject = make_subject_with_null_setter();
         subject.automap_control_factory = Box::new(
             AutomapControlFactoryMock::new().make_result(
                 AutomapControlMock::new()
@@ -1235,8 +1236,7 @@ mod tests {
             ),
         };
         let make_params_arc = Arc::new(Mutex::new(vec![]));
-        let mut subject = ActorSystemFactoryToolsReal::new();
-        subject.log_recipient_setter = Box::new(LogRecipientSetterNull::new());
+        let mut subject = make_subject_with_null_setter();
         subject.automap_control_factory = Box::new(
             AutomapControlFactoryMock::new()
                 .make_params(&make_params_arc)
@@ -1295,8 +1295,7 @@ mod tests {
             },
         };
         let system = System::new("MASQNode");
-        let mut subject = ActorSystemFactoryToolsReal::new();
-        subject.log_recipient_setter = Box::new(LogRecipientSetterNull::new());
+        let mut subject = make_subject_with_null_setter();
         subject.automap_control_factory = Box::new(AutomapControlFactoryMock::new());
 
         let _ = subject.prepare_initial_messages(
@@ -1461,8 +1460,7 @@ mod tests {
             },
             node_descriptor: Default::default(),
         };
-        let mut subject = ActorSystemFactoryToolsReal::new();
-        subject.log_recipient_setter = Box::new(LogRecipientSetterNull::new());
+        let subject = make_subject_with_null_setter();
         let system = System::new("MASQNode");
 
         let _ = subject.prepare_initial_messages(
@@ -1769,5 +1767,11 @@ mod tests {
     fn public_key_for_dyn_cryptde_being_null(cryptde: &dyn CryptDE) -> &PublicKey {
         let null_cryptde = <&CryptDENull>::from(cryptde);
         null_cryptde.public_key()
+    }
+
+    fn make_subject_with_null_setter() -> ActorSystemFactoryToolsReal {
+        let mut subject = ActorSystemFactoryToolsReal::new();
+        subject.log_recipient_setter = Box::new(LogRecipientSetterNull::new());
+        subject
     }
 }
